@@ -1,0 +1,16 @@
+{
+  "name": "pupmoney-database",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+  },
+  "engines": {
+    "node": ">= 11.6.0"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+  },
+  "author": "Warren Anderson",
+  "license": "Copyright 2019 Wyoming Software, Inc. All rights reserved"
+}
