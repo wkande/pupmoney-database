@@ -1,3 +1,6 @@
+/**
+ * Gets a summary list of paginated expenses amounts within the paginated date range.
+ */
 
 
 CREATE OR REPLACE FUNCTION get_expense_summary(dttmStart DATE, dttmEnd DATE, expId integer)

@@ -1,3 +1,6 @@
+/**
+ * Deletes all wallet child records from the wallet shard.
+ */
 
 
 CREATE OR REPLACE FUNCTION delete_wallet_shard(walletId integer) 

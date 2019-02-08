@@ -24,8 +24,6 @@ SET client_min_messages TO WARNING;
 \! echo "------------------------------"
 DROP SCHEMA if exists pupmoney CASCADE;
 CREATE SCHEMA pupmoney;
---GRANT ALL ON SCHEMA pupmoney TO postgres;
---GRANT ALL ON SCHEMA pupmoney TO public;
 COMMENT ON SCHEMA pupmoney IS 'pupmoney schema';
 
 
@@ -53,7 +51,7 @@ CREATE TABLE USERS (
     sys_admin smallint CHECK (sys_admin = 0 OR sys_admin = 1) DEFAULT 0  -- sys_admin for in-house privs
 );
 CREATE UNIQUE INDEX _users_email_idx ON USERS (email);
-
+/** @TODO Add a text search on users */
 
 -- WALLETS --
 CREATE TABLE WALLETS (

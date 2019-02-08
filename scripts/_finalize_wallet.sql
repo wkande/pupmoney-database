@@ -1,3 +1,6 @@
+/**
+ * Creates child rows (default values) for a wallet in assets, expenses and expense/vendors.
+ */
 
 
 CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer) 

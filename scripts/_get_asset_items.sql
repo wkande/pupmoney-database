@@ -1,3 +1,7 @@
+/**
+ * Get the asset_items for an asset. The row count is also included.
+ * @TODO - There may be a need in the future to add pagination.
+ */
 
 
 CREATE OR REPLACE FUNCTION get_asset_items(walletId integer, assetId integer, skip integer)

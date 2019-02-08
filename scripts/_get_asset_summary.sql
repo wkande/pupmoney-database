@@ -27,16 +27,6 @@ CREATE OR REPLACE FUNCTION get_asset_summary(assetId integer, assetDttm date)
             GROUP BY id, dttm
         ) t;
 
-
-        -- Check for null if asset has no items
-        /*IF (result is NULL) THEN
-            WITH r AS (
-                SELECT  0 AS asset_item_id, assetDttm AS dttm, to_char(assetDttm,'Mon-YYYY') AS month_year, 0 AS amt
-                )
-            SELECT row_to_json(r.*) into result
-            FROM r;
-        END IF;*/
-
         IF (result is NULL) THEN
             WITH r AS (
                 SELECT  0 AS asset_item_id, assetDttm AS dttm, 0 AS amt
@@ -44,7 +34,6 @@ CREATE OR REPLACE FUNCTION get_asset_summary(assetId integer, assetDttm date)
             SELECT row_to_json(r.*) into result
             FROM r;
         END IF;
-
 
         RETURN result;
     EXCEPTION
