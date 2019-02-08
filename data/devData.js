@@ -3,7 +3,6 @@ var fs = require("fs");
 var war = fs.readFileSync("./data/_war_peace.txt").toString('utf-8');
 
 
-//let pswd = '8cf90eba82926e8a0cf760846ef327052c5c2de1d18f05795ea7b24127adfae2';
 let name;
 let email;
 

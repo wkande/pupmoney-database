@@ -1,4 +1,6 @@
--- The json record carrier for asset_items and expense_items
+/**
+ * The json record carrier for asset_items and expense_items.
+ */
 
 
 CREATE TYPE items AS (

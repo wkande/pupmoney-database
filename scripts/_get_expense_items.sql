@@ -1,3 +1,7 @@
+/**
+ * Gets a list of paginated expense-items. The pagination is based on a date range. The total row count 
+ * is included for all records outside the pagination range.
+ */
 
 
 CREATE OR REPLACE FUNCTION get_expense_items(dttmStart DATE, dttmEnd DATE, walletId integer, expID integer, skip integer)
