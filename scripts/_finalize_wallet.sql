@@ -21,6 +21,10 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
                 (walletId, 'Vehicle #1'),
                 (walletId, 'Vehicle #2');
 
+        INSERT INTO assets (wallet_id, name, liability) 
+        VALUES  (walletId, 'House Mortgage', 1),
+                (walletId, 'Vehicle #1 Car Loan', 1);
+
 
         -- Groceries
         INSERT INTO expenses (wallet_id, name, icon) VALUES  (walletId, 'Groceries', 'nutrition') RETURNING id INTO exp_id;

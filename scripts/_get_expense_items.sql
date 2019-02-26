@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION get_expense_items(dttmStart DATE, dttmEnd DATE, walle
         
         SELECT array_to_json(array_agg(row_to_json(t))) INTO result.items 
         from (  
-            SELECT i.id, i.expense_id, e.wallet_id, i.amt, i.dttm, i.note, i.vendor
+            SELECT i.id, i.expense_id, e.wallet_id, i.amt, i.credit, i.dttm, i.note, i.vendor
             FROM expense_items i JOIN expenses e
             ON i.expense_id = e.id
             WHERE i.dttm between dttmStart AND dttmEnd AND wallet_id = walletId AND i.expense_id = expId 

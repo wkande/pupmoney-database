@@ -45,14 +45,16 @@ SELECT count(*) = 0 as not_master FROM information_schema.tables WHERE table_sch
 
 
 -- ASSETS --
-CREATE TABLE ASSETS (
+CREATE TABLE pupmoney.ASSETS (
     id serial PRIMARY KEY,
     wallet_id integer NOT NULL,
     name text NOT NULL,
+    liability smallint NOT NULL DEFAULT 0, -- 0=asset, 1=liability, if liability ASSET_ITEMS.amt must be negative, otherwise positive
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX _assets_dttm_idx ON ASSETS (dttm);
-CREATE INDEX _assets_wallet_id_idx ON ASSETS (wallet_id);
+ALTER TABLE pupmoney.ASSETS ADD CONSTRAINT liability_check CHECK ( liability = 0 OR liability = 1 );
+CREATE INDEX _assets_dttm_idx ON pupmoney.ASSETS (dttm);
+CREATE INDEX _assets_wallet_id_idx ON pupmoney.ASSETS (wallet_id);
 
 
 -- ASSET_ITEMS --
@@ -70,36 +72,39 @@ CREATE UNIQUE INDEX _asset_items_asset_item_id_dttm_idx ON pupmoney.ASSET_ITEMS 
 
 
 -- EXPENSES --
-CREATE TABLE EXPENSES (
+CREATE TABLE pupmoney.EXPENSES (
     id serial PRIMARY KEY,
     wallet_id integer NOT NULL,
     name text NOT NULL,
     icon text NOT NULL DEFAULT 'logo-usd',
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX _expenses_dttm_idx ON EXPENSES (dttm);
-CREATE INDEX _expenses_wallet_id_idx ON EXPENSES (wallet_id);
+CREATE INDEX _expenses_dttm_idx ON pupmoney.EXPENSES (dttm);
+CREATE INDEX _expenses_wallet_id_idx ON pupmoney.EXPENSES (wallet_id);
 
 
 -- EXPENSE_ITEMS --
 -- Max amt 9,999,999,999.9999 or 10 billion
-CREATE TABLE EXPENSE_ITEMS (
+CREATE TABLE pupmoney.EXPENSE_ITEMS (
     id serial PRIMARY KEY,
     expense_id integer REFERENCES EXPENSES (id) ON DELETE CASCADE NOT NULL, 
     vendor text,
     note text,
     document tsvector,
     image_ref text, -- cloud storage reference ex: /user/2/expense/345/expense_item/4557
+    imported text, -- if not null then this record came from a competitor's import
+    credit smallint NOT NULL DEFAULT 0, -- 0=expense, 1=credit, if credit must be negative amt, otherwise positive amt
     amt numeric(14,4) not null,
     dttm DATE not null
 );
-CREATE INDEX _expense_items_dttm_idx ON EXPENSE_ITEMS (dttm);
-CREATE INDEX _expense_items_expense_id_idx ON EXPENSE_ITEMS (expense_id);
-CREATE INDEX _expense_items_text_search_idx ON EXPENSE_ITEMS USING gin(document);
+ALTER TABLE pupmoney.EXPENSE_ITEMS ADD CONSTRAINT credit_check CHECK ( credit = 0 OR credit = 1 );
+CREATE INDEX _expense_items_dttm_idx ON pupmoney.EXPENSE_ITEMS (dttm);
+CREATE INDEX _expense_items_expense_id_idx ON pupmoney.EXPENSE_ITEMS (expense_id);
+CREATE INDEX _expense_items_text_search_idx ON pupmoney.EXPENSE_ITEMS USING gin(document);
 
 
 -- VENDORS --
-CREATE TABLE VENDORS (
+CREATE TABLE pupmoney.VENDORS (
     id serial PRIMARY KEY,
     expense_id integer REFERENCES EXPENSES (id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL
@@ -117,16 +122,16 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \if :is_warren
     do $$
     BEGIN
-        grant all on vendors_id_seq to warren;
-        grant all on vendors to warren;
-        grant all on assets_id_seq to warren;
-        grant all on assets to warren;
-        grant all on asset_items_id_seq to warren;
-        grant all on asset_items to warren;
-        grant all on expenses_id_seq to warren;
-        grant all on expenses to warren;
-        grant all on expense_items_id_seq to warren;
-        grant all on expense_items to warren;
+        grant all on pupmoney.vendors_id_seq to warren;
+        grant all on pupmoney.vendors to warren;
+        grant all on pupmoney.assets_id_seq to warren;
+        grant all on pupmoney.assets to warren;
+        grant all on pupmoney.asset_items_id_seq to warren;
+        grant all on pupmoney.asset_items to warren;
+        grant all on pupmoney.expenses_id_seq to warren;
+        grant all on pupmoney.expenses to warren;
+        grant all on pupmoney.expense_items_id_seq to warren;
+        grant all on pupmoney.expense_items to warren;
     END;
     $$ LANGUAGE plpgsql;
 \endif
@@ -146,6 +151,8 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \i   ~/Development/_pupmoney/database/scripts/_get_expense_items.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_expense_summary.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_asset_summary.sql;
+\i   ~/Development/_pupmoney/database/scripts/_check_asset_item_liability_amt.sql
+\i   ~/Development/_pupmoney/database/scripts/_check_expense_item_credit_amt.sql
 --\i   ~/Development/_pupmoney/database/scripts/_check_asset_item_dttm.sql;
 \i   ~/Development/_pupmoney/database/scripts/_check_asset_item_asset_id.sql;
 \i   ~/Development/_pupmoney/database/scripts/_check_expense_item_expense_id.sql;

@@ -142,7 +142,7 @@ let startAssetItems = async function(wallet_id, shard){
     for(var i=0; i<res.rows.length; i++){
         for(var z=0; z<48; z++){
             try{
-                await addAssetItems(res.rows[i].id, shard);
+                await addAssetItems(res.rows[i].id, res.rows[i].liability, shard);
             }
             catch(err){
                 // If there is a duplicate dattm let it go
@@ -150,12 +150,13 @@ let startAssetItems = async function(wallet_id, shard){
         }
     }
 }
-let addAssetItems = async function(asset_id, shard){
+let addAssetItems = async function(asset_id, liability_flag, shard){
     var precision = 100; // 2 decimals
     var randomnum = Math.floor(Math.random() * (10 * precision - 1 * precision) + 1 * precision) / (1*precision);
     let randumDate = getRandomDate(new Date(2014, 0, 1), new Date());
     // console.log('randumDate', randumDate);
     //randumDate.setDate(01);
+    if(liability_flag == 1) randomnum = randomnum * -1;
     try{
         var query = {
             name: 'asset-items-post',
@@ -198,15 +199,26 @@ let addExpItems = async function(exp_id, exp_name, shard){
     //console.log(note);
     let document = getSearchTextDoc(exp_name, vendor, note);
     //console.log('===>'+document+'<===');
+
+    // Credit
+    var items = Array(0,0,0,0,0,1,0,1,0,0,1,0,0,0);
+    var credit = items[Math.floor(Math.random()*items.length)];
+    if(credit == 1) randomnum = randomnum * -1;
+
     
-    
+    try{
         var query = {
             name: 'exp-items-post',
-            text: `insert into expense_items (expense_id, amt, dttm, document, note, vendor) 
-            values ($1, $2, $3, to_tsvector($4), $5, $6) returning id`,
-            values: [exp_id, randomnum, randumDate, document, note, vendor]
+            text: `insert into expense_items (expense_id, amt, dttm, document, note, vendor, credit) 
+            values ($1, $2, $3, to_tsvector($4), $5, $6, $7) returning id`,
+            values: [exp_id, randomnum, randumDate, document, note, vendor, credit]
         };
         const res = await shards[shard].query(query);
+    }
+    catch(err){
+        // May fail due to duplicate date, just let it go
+        console.log(err.toString());
+    }
     
 }
 

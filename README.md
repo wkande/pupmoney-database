@@ -3,7 +3,7 @@ Database script and notes for PupMoney.
 
 PostgreSQL version 11x. Production and Stage are run on ElephantSQL and development is localhost. The
 databases are manually sharded. The backend will connect to all databases listed in the DB_URLS array.
-Shard #0 holds the USERS, CODES and WALLETS tables plus a set of wallet child tables. Shards #1 (and up hold only the wallet child tables.
+Shard #0 holds the USERS, CODES and WALLETS tables plus a set of wallet child tables. Shards #1 (and up) hold only the wallet child tables.
 
 
 ## SEARCH_PATH
