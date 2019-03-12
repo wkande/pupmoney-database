@@ -1,6 +1,5 @@
 /**
- * Gets a list of paginated expense-items. The pagination is based on a date range. The total row count 
- * is included for all records outside the pagination range.
+ * Gets a summary list of expense_items within a date range and an optional text search.
  */
 
 
@@ -28,15 +27,6 @@ CREATE OR REPLACE FUNCTION get_expense_items(q TEXT, dttmStart DATE, dttmEnd DAT
             WHERE i.dttm between dttmStart AND dttmEnd AND e.wallet_id = walletId AND i.expense_id = expID;
 
         ELSE
-            /*SELECT row_to_json(t)
-            FROM (
-                SELECT coalesce(sum(amt), 0) amt, count(amt) cnt
-                INTO result 
-                FROM expense_items 
-                WHERE document @@ to_tsquery(q)
-                AND dttm between dttmStart AND dttmEnd AND expense_id = expId
-            ) t;*/
-
             SELECT array_to_json(array_agg(row_to_json(t))) INTO result.items 
             from (  
                 SELECT i.id, i.expense_id, e.wallet_id, i.document, i.amt, i.dttm, i.note, i.vendor

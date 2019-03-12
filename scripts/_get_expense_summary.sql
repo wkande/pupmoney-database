@@ -1,5 +1,5 @@
 /**
- * Gets a summary list of expenses amounts within a date range.
+ * Gets a summary list of expenses amounts within a date range and an optional text search.
  */
 
 
