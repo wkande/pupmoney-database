@@ -48,7 +48,7 @@ CREATE TABLE pupmoney.USERS (
     name text,
     member_since DATE DEFAULT current_date,
     sub_expires DATE DEFAULT current_date + 120,
-    sys_admin smallint CHECK (sys_admin = 0 OR sys_admin = 1) DEFAULT 0  -- sys_admin for in-house privs
+    sys_admin smallint CHECK (sys_admin = null OR sys_admin = 1) DEFAULT null  -- sys_admin for in-house privs
 );
 CREATE UNIQUE INDEX _users_email_idx ON pupmoney.USERS (email);
 /** @TODO Add a text search on users */

@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION delete_wallet_shard(walletId integer)
         --r_Return record;
     BEGIN
 
-        DELETE FROM assets where wallet_id = walletId;
+        --DELETE FROM assets where wallet_id = walletId;
 
         DELETE FROM expenses where wallet_id = walletId;
 

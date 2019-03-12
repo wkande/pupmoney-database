@@ -1,27 +1,37 @@
 /**
- * Gets a summary list of paginated expenses amounts within the paginated date range.
+ * Gets a summary list of expenses amounts within a date range.
  */
 
 
-CREATE OR REPLACE FUNCTION get_expense_summary(dttmStart DATE, dttmEnd DATE, expId integer)
+CREATE OR REPLACE FUNCTION get_expense_summary(q TEXT, dttmStart DATE, dttmEnd DATE, expId integer)
 
     RETURNS json AS $$
     DECLARE
         result json;
     BEGIN
-
-        SELECT row_to_json(t)
-        FROM (
-            SELECT coalesce(sum(amt), 0) amt, count(amt) cnt
-            INTO result 
-            FROM expense_items 
-            WHERE dttm between dttmStart AND dttmEnd AND expense_id = expId
-        ) t;
+        IF length(q) = 0 THEN
+            SELECT row_to_json(t)
+            FROM (
+                SELECT coalesce(sum(amt), 0) amt, count(amt) cnt
+                INTO result 
+                FROM expense_items 
+                WHERE dttm between dttmStart AND dttmEnd AND expense_id = expId
+            ) t;
+        ELSE
+            SELECT row_to_json(t)
+            FROM (
+                SELECT coalesce(sum(amt), 0) amt, count(amt) cnt
+                INTO result 
+                FROM expense_items 
+                WHERE document @@ to_tsquery(q)
+                AND dttm between dttmStart AND dttmEnd AND expense_id = expId
+            ) t;
+        END IF;
 
         RETURN result;
     EXCEPTION
         WHEN others THEN
-            RAISE NOTICE 'caught at get_expense_summary';
+            RAISE EXCEPTION 'get_expense_summary - % %', SQLERRM, SQLSTATE;
     END;
     $$ LANGUAGE plpgsql;
 

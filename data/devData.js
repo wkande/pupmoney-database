@@ -46,7 +46,7 @@ let start = async function(){
     }
 
     // Add more users
-    for(var i=0; i<2; i++){
+    for(var i=0; i<200; i++){
         cnt++;
         name = 'TestUser_'+cnt;
         email = 'test_user_'+cnt+'@noaddresshere.com';
@@ -98,7 +98,7 @@ let addUser = async function(){
         const walletRes = await shards[wallet_shard].query(query);
         console.log('FINALIZE WALLET:', walletRes.rows[0]);
 
-        const one = await startAssetItems(wallet_id, shard);
+        //const one = await startAssetItems(wallet_id, shard);
         const two = await startExpItems(data.rows[0].id, shard);
         
 };
@@ -185,7 +185,7 @@ let startExpItems = async function(wallet_id, shard){
     console.log('  EXPENSES FOUND', res.rowCount);
     for(var i=0; i<res.rows.length; i++){
         //console.log("      EXP_ID", res.rows[i].id, "NAME", res.rows[i].name);
-        for(var z=0; z<300; z++){
+        for(var z=0; z<307; z++){
             await addExpItems(res.rows[i].id, res.rows[i].name, shard);
         }
     }
@@ -197,7 +197,7 @@ let addExpItems = async function(exp_id, exp_name, shard){
     let vendor = randomVendor();
     let note = getNoteTextDoc();
     //console.log(note);
-    let document = getSearchTextDoc(exp_name, vendor, note);
+    //let document = getSearchTextDoc(exp_name, vendor, note, randomnum);
     //console.log('===>'+document+'<===');
 
     // Credit
@@ -209,9 +209,9 @@ let addExpItems = async function(exp_id, exp_name, shard){
     try{
         var query = {
             name: 'exp-items-post',
-            text: `insert into expense_items (expense_id, amt, dttm, document, note, vendor, credit) 
-            values ($1, $2, $3, to_tsvector($4), $5, $6, $7) returning id`,
-            values: [exp_id, randomnum, randumDate, document, note, vendor, credit]
+            text: `insert into expense_items (expense_id, amt, dttm, note, vendor, document) 
+            values ($1, $2, $3, $4, $5, $6) returning id`,
+            values: [exp_id, randomnum, randumDate, note, vendor, "Placeholder for trigger"]
         };
         const res = await shards[shard].query(query);
     }
@@ -224,11 +224,11 @@ let addExpItems = async function(exp_id, exp_name, shard){
 
 // ***** BUILD TEXT DOCUMENT ***** //
 // https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
-function getSearchTextDoc(exp_name, vendor, note){
+/*function getSearchTextDoc(exp_name, vendor, note){
     if(!note) note = ' ';
     if(!vendor) vendor = '';
     return exp_name+' '+vendor+' '+note;
-}
+}*/
 
 // ***** GET NOTE TEXT ***** //
 function getNoteTextDoc(){
