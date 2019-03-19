@@ -46,7 +46,7 @@ let start = async function(){
     }
 
     // Add more users
-    for(var i=0; i<2; i++){
+    for(var i=0; i<200; i++){
         cnt++;
         name = 'TestUser_'+cnt;
         email = 'test_user_'+cnt+'@noaddresshere.com';
@@ -98,7 +98,6 @@ let addUser = async function(){
         const walletRes = await shards[wallet_shard].query(query);
         console.log('FINALIZE WALLET:', walletRes.rows[0]);
 
-        const one = await startAssetItems(wallet_id, shard);
         const two = await startExpItems(data.rows[0].id, shard);
         
 };
@@ -131,92 +130,48 @@ let getShard = async function(){
 
 
 
-let startAssetItems = async function(wallet_id, shard){
-    var query = {
-        name: 'assets-get',
-        text: "SELECT * from assets where wallet_id = $1 order by name",
-        values: [wallet_id]
-    };
-    const res = await shards[shard].query(query);
-    console.log('  ASSETS FOUND', res.rowCount);
-    for(var i=0; i<res.rows.length; i++){
-        for(var z=0; z<48; z++){
-            try{
-                await addAssetItems(res.rows[i].id, shard);
-            }
-            catch(err){
-                // If there is a duplicate dattm let it go
-            }
-        }
-    }
-}
-let addAssetItems = async function(asset_id, shard){
-    var precision = 100; // 2 decimals
-    var randomnum = Math.floor(Math.random() * (10 * precision - 1 * precision) + 1 * precision) / (1*precision);
-    let randumDate = getRandomDate(new Date(2014, 0, 1), new Date());
-    // console.log('randumDate', randumDate);
-    //randumDate.setDate(01);
-    try{
-        var query = {
-            name: 'asset-items-post',
-            text: "insert into asset_items (asset_id, amt, dttm) values ($1, $2, $3)",
-            values: [asset_id, randomnum, randumDate]
-        };
-        const res = await shards[shard].query(query);
-        //process.stdout.write(".");
-    }
-    catch(err){
-        // May fail due to duplicate date, just let it go
-        //console.log(err.detail);
-    }
 
-}
-
-
-////////// EXP ///////////////////
+////////// CAT ///////////////////
 let startExpItems = async function(wallet_id, shard){
     var query = {
         name: 'exp-get',
-        text: "SELECT * from expenses where wallet_id = $1 order by name",
+        text: "SELECT * from categories where wallet_id = $1 order by name",
         values: [wallet_id]
     };
     const res = await shards[shard].query(query);
-    console.log('  EXPENSES FOUND', res.rowCount);
+    console.log('  CATEGORIES FOUND', res.rowCount);
     for(var i=0; i<res.rows.length; i++){
-        //console.log("      EXP_ID", res.rows[i].id, "NAME", res.rows[i].name);
-        for(var z=0; z<300; z++){
-            await addExpItems(res.rows[i].id, res.rows[i].name, shard);
+        //console.log("      CAT_ID", res.rows[i].id, "NAME", res.rows[i].name);
+        for(var z=0; z<307; z++){
+            await addExpenses(res.rows[i].id, shard);
         }
     }
 }
-let addExpItems = async function(exp_id, exp_name, shard){
+let addExpenses = async function(cat_id, shard){
     var precision = 100; // 2 decimals
     var randomnum = Math.floor(Math.random() * (10 * precision - 1 * precision) + 1 * precision) / (1*precision);
     let randumDate = getRandomDate(new Date(2014, 0, 1), new Date());
     let vendor = randomVendor();
     let note = getNoteTextDoc();
-    //console.log(note);
-    let document = getSearchTextDoc(exp_name, vendor, note);
-    //console.log('===>'+document+'<===');
-    
-    
+    //console.log('cat_id, shard', cat_id, shard);
+
+    try{
         var query = {
-            name: 'exp-items-post',
-            text: `insert into expense_items (expense_id, amt, dttm, document, note, vendor) 
-            values ($1, $2, $3, to_tsvector($4), $5, $6) returning id`,
-            values: [exp_id, randomnum, randumDate, document, note, vendor]
+            name: 'expenses-item-post',
+            text: `insert into expenses (category_id, amt, dttm, note, vendor, document) 
+            values ($1, $2, $3, $4, $5, $6) returning id`,
+            values: [cat_id, randomnum, randumDate, note, vendor, "Placeholder for trigger"]
         };
         const res = await shards[shard].query(query);
+    }
+    catch(err){
+        // May fail due to duplicate date, just let it go
+        console.log("ERROR inserting expense:", err.toString());
+    }
     
 }
 
-// ***** BUILD TEXT DOCUMENT ***** //
-// https://www.compose.com/articles/mastering-postgresql-tools-full-text-search-and-phrase-search/
-function getSearchTextDoc(exp_name, vendor, note){
-    if(!note) note = ' ';
-    if(!vendor) vendor = '';
-    return exp_name+' '+vendor+' '+note;
-}
+
 
 // ***** GET NOTE TEXT ***** //
 function getNoteTextDoc(){

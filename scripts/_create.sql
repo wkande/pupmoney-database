@@ -13,9 +13,9 @@
 -- https://stackoverflow.com/questions/34098326/how-to-select-a-schema-in-postgres-when-using-psql 
 -- SHOW search_path;
 SET client_min_messages TO WARNING;
---SET search_path TO pupmoney;
---SHOW search_path;
---\dt
+-- SET search_path TO pupmoney;
+-- SHOW search_path;
+-- \dt
 
 
 
@@ -44,67 +44,44 @@ SELECT count(*) = 0 as not_master FROM information_schema.tables WHERE table_sch
 \! echo "-------------------------"
 
 
--- ASSETS --
-CREATE TABLE ASSETS (
+-- CATEGORIES --
+CREATE TABLE pupmoney.CATEGORIES (
     id serial PRIMARY KEY,
     wallet_id integer NOT NULL,
     name text NOT NULL,
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX _assets_dttm_idx ON ASSETS (dttm);
-CREATE INDEX _assets_wallet_id_idx ON ASSETS (wallet_id);
-
-
--- ASSET_ITEMS --
--- Max amt 9,999,999,999,999.9999 or 10 trillion
-CREATE TABLE pupmoney.ASSET_ITEMS (
-    id serial PRIMARY KEY,
-    asset_id integer REFERENCES ASSETS (id) ON DELETE CASCADE NOT NULL, 
-    amt numeric(17,4) not null,
-    dttm DATE not null      -- unique for each asset_id
-);
-CREATE INDEX _asset_items_dttm_idx ON pupmoney.ASSET_ITEMS (dttm);
-CREATE INDEX _asset_items_asset_id_idx ON pupmoney.ASSET_ITEMS (asset_id);
--- Need a unique index on asset_id and dttm
-CREATE UNIQUE INDEX _asset_items_asset_item_id_dttm_idx ON pupmoney.ASSET_ITEMS (asset_id, dttm);
+CREATE INDEX _categories_dttm_idx ON pupmoney.CATEGORIES (dttm);
+CREATE INDEX _categories_wallet_id_idx ON pupmoney.CATEGORIES (wallet_id);
+CREATE UNIQUE INDEX _categories_wallet_id_name_idx ON pupmoney.CATEGORIES (wallet_id, name);
 
 
 -- EXPENSES --
-CREATE TABLE EXPENSES (
-    id serial PRIMARY KEY,
-    wallet_id integer NOT NULL,
-    name text NOT NULL,
-    icon text NOT NULL DEFAULT 'logo-usd',
-    dttm DATE DEFAULT current_date
-);
-CREATE INDEX _expenses_dttm_idx ON EXPENSES (dttm);
-CREATE INDEX _expenses_wallet_id_idx ON EXPENSES (wallet_id);
-
-
--- EXPENSE_ITEMS --
 -- Max amt 9,999,999,999.9999 or 10 billion
-CREATE TABLE EXPENSE_ITEMS (
+CREATE TABLE pupmoney.EXPENSES (
     id serial PRIMARY KEY,
-    expense_id integer REFERENCES EXPENSES (id) ON DELETE CASCADE NOT NULL, 
+    category_id integer REFERENCES CATEGORIES (id) ON DELETE CASCADE NOT NULL, 
     vendor text,
     note text,
     document tsvector,
-    image_ref text, -- cloud storage reference ex: /user/2/expense/345/expense_item/4557
+    image_ref text, -- google cloud storage reference for image, ex: /user/2/expense/345/expense_item/4557
+    imported text, -- if not null then this record came from a competitor's import
     amt numeric(14,4) not null,
     dttm DATE not null
 );
-CREATE INDEX _expense_items_dttm_idx ON EXPENSE_ITEMS (dttm);
-CREATE INDEX _expense_items_expense_id_idx ON EXPENSE_ITEMS (expense_id);
-CREATE INDEX _expense_items_text_search_idx ON EXPENSE_ITEMS USING gin(document);
+CREATE INDEX _expenses_dttm_idx ON pupmoney.EXPENSES (dttm);
+CREATE INDEX _expenses_category_id_idx ON pupmoney.EXPENSES (category_id);
+CREATE INDEX _expenses_text_search_idx ON pupmoney.EXPENSES USING gin(document);
 
 
 -- VENDORS --
-CREATE TABLE VENDORS (
+CREATE TABLE pupmoney.VENDORS (
     id serial PRIMARY KEY,
-    expense_id integer REFERENCES EXPENSES (id) ON DELETE CASCADE NOT NULL,
+    category_id integer REFERENCES CATEGORIES (id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL
 );
-CREATE INDEX _vendors_expense_id_idx ON pupmoney.VENDORS (expense_id);
+CREATE INDEX _vendors_category_id_idx ON pupmoney.VENDORS (category_id);
+CREATE UNIQUE INDEX _vendors_category_id_name_idx ON pupmoney.VENDORS (category_id, name);
 
 
 \! echo "\n-----------------------------------"
@@ -117,16 +94,12 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \if :is_warren
     do $$
     BEGIN
-        grant all on vendors_id_seq to warren;
-        grant all on vendors to warren;
-        grant all on assets_id_seq to warren;
-        grant all on assets to warren;
-        grant all on asset_items_id_seq to warren;
-        grant all on asset_items to warren;
-        grant all on expenses_id_seq to warren;
-        grant all on expenses to warren;
-        grant all on expense_items_id_seq to warren;
-        grant all on expense_items to warren;
+        grant all on pupmoney.vendors_id_seq to warren;
+        grant all on pupmoney.vendors to warren;
+        grant all on pupmoney.categories_id_seq to warren;
+        grant all on pupmoney.categories to warren;
+        grant all on pupmoney.expenses_id_seq to warren;
+        grant all on pupmoney.expenses to warren;
     END;
     $$ LANGUAGE plpgsql;
 \endif
@@ -142,13 +115,10 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \i   ~/Development/_pupmoney/database/scripts/_finalize_wallet.sql;
 \i   ~/Development/_pupmoney/database/scripts/_delete_wallet_shard.sql;
 \i   ~/Development/_pupmoney/database/scripts/_items_type.sql;
-\i   ~/Development/_pupmoney/database/scripts/_get_asset_items.sql;
-\i   ~/Development/_pupmoney/database/scripts/_get_expense_items.sql;
-\i   ~/Development/_pupmoney/database/scripts/_get_expense_summary.sql;
-\i   ~/Development/_pupmoney/database/scripts/_get_asset_summary.sql;
---\i   ~/Development/_pupmoney/database/scripts/_check_asset_item_dttm.sql;
-\i   ~/Development/_pupmoney/database/scripts/_check_asset_item_asset_id.sql;
-\i   ~/Development/_pupmoney/database/scripts/_check_expense_item_expense_id.sql;
+\i   ~/Development/_pupmoney/database/scripts/_get_expenses.sql;
+\i   ~/Development/_pupmoney/database/scripts/_get_category_summary.sql;
+\i   ~/Development/_pupmoney/database/scripts/_check_expense_category_id.sql;
+\i   ~/Development/_pupmoney/database/scripts/_create_expense_document.sql;
 
 
 

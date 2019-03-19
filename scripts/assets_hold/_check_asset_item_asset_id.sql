@@ -10,13 +10,13 @@ CREATE OR REPLACE FUNCTION check_asset_item_asset_id() RETURNS trigger AS $asset
         oldWalletId integer;
         newWalletId integer;
     BEGIN
-
+    
         SELECT wallet_id INTO oldWalletId FROM assets WHERE id = OLD.asset_id;
 
         select wallet_id into newWalletID from assets where id = NEW.asset_id;
 
         IF oldWalletId != newWalletId THEN
-            RAISE EXCEPTION 'you cannot move an asset_item into an asset from another wallet';
+            RAISE EXCEPTION 'You cannot move an asset_item into an asset from another wallet';
         END IF;
         RETURN NEW;
     END;
