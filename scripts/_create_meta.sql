@@ -16,7 +16,7 @@
 SET client_min_messages TO WARNING;
 -- SET search_path TO pupmoney;
 -- SHOW search_path;
---\dt
+-- \dt
 
 
 \! echo "\n------------------------------"
@@ -32,10 +32,10 @@ COMMENT ON SCHEMA pupmoney IS 'pupmoney schema';
 \! echo "Create tables and indexes"
 \! echo "-------------------------"
 -- CODE --
-create table pupmoney.CODES( -- For registration and forgotten pswds
+create table pupmoney.CODES( -- For registration and login
   email text NOT NULL,
   code text NOT NULL,
-  dttm DATE NOT NULL default CURRENT_DATE -- MM/DD/YYYY used to purge codes after 1 day
+  dttm DATE NOT NULL default CURRENT_DATE -- MM/DD/YYYY used to purge codes by cron after 1 day
 );
 ALTER TABLE codes ADD CONSTRAINT email_check CHECK ( length(email) > 5 AND length(code) = 5 );
 CREATE UNIQUE INDEX codes_email_idx ON CODES (email);
@@ -53,6 +53,7 @@ CREATE TABLE pupmoney.USERS (
 CREATE UNIQUE INDEX _users_email_idx ON pupmoney.USERS (email);
 /** @TODO Add a text search on users */
 
+
 -- WALLETS --
 CREATE TABLE pupmoney.WALLETS (
     id serial PRIMARY KEY,
@@ -60,8 +61,6 @@ CREATE TABLE pupmoney.WALLETS (
     shard integer NOT NULL, -- 0, 1, 2, ...
     shares integer[] DEFAULT array[]::integer[],
     name text NOT NULL,
-    country_code text not null DEFAULT 'en-US',
-    currency_options json not null DEFAULT '{"style": "currency", "currency": "USD", "minimumFractionDigits": 2}',
     default_wallet smallint NOT NULL DEFAULT 0, --0=false , 1=true default wallets cannot be deleted, each user has 1
     dttm DATE DEFAULT current_date
 );
@@ -69,6 +68,14 @@ CREATE INDEX wallet_shares_idx on pupmoney.WALLETS USING GIN ("shares");
 CREATE INDEX _wallets_user_id_idx ON pupmoney.WALLETS (user_id);
 
 
+CREATE TABLE pupmoney.IPS (
+    id serial PRIMARY KEY,
+    ip text NOT NULL,
+    user_id integer REFERENCES USERS (id) NOT NULL, -- NO CASCADE DELETE
+    dttm DATE DEFAULT current_date
+);
+CREATE INDEX _ips_user_id_idx ON pupmoney.IPS (user_id);
+CREATE UNIQUE INDEX _userid_ip_idx ON pupmoney.IPS (user_id, ip);
 
 \! echo "\n-------------------------"
 \! echo "Create development grants"
@@ -84,6 +91,8 @@ SELECT current_user = 'warren' AS is_warren; \gset
         grant all on pupmoney.users to warren;
         grant all on pupmoney.wallets_id_seq to warren;
         grant all on pupmoney.wallets to warren;
+        grant all on pupmoney.ips_id_seq to warren;
+        grant all on pupmoney.ips to warren;
     END;
     $$ LANGUAGE plpgsql;
 \endif

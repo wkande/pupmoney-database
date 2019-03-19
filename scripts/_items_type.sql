@@ -1,5 +1,5 @@
 /**
- * The json record carrier for expense_items.
+ * The json record carrier for expenses.
  */
 
 
