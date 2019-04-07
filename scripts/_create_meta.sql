@@ -32,7 +32,7 @@ COMMENT ON SCHEMA pupmoney IS 'pupmoney schema';
 \! echo "Create tables and indexes"
 \! echo "-------------------------"
 -- CODE --
-create table pupmoney.CODES( -- For registration and login
+create table CODES( -- For registration and login
   email text NOT NULL,
   code text NOT NULL,
   dttm DATE NOT NULL default CURRENT_DATE -- MM/DD/YYYY used to purge codes by cron after 1 day
@@ -42,7 +42,7 @@ CREATE UNIQUE INDEX codes_email_idx ON CODES (email);
 
 
 -- USERS --
-CREATE TABLE pupmoney.USERS (
+CREATE TABLE USERS (
     id serial PRIMARY KEY,
     email text NOT NULL,
     name text,
@@ -50,12 +50,12 @@ CREATE TABLE pupmoney.USERS (
     sub_expires DATE DEFAULT current_date + 120,
     sys_admin smallint CHECK (sys_admin = null OR sys_admin = 1) DEFAULT null  -- sys_admin for in-house privs
 );
-CREATE UNIQUE INDEX _users_email_idx ON pupmoney.USERS (email);
+CREATE UNIQUE INDEX _users_email_idx ON USERS (email);
 /** @TODO Add a text search on users */
 
 
 -- WALLETS --
-CREATE TABLE pupmoney.WALLETS (
+CREATE TABLE WALLETS (
     id serial PRIMARY KEY,
     user_id integer REFERENCES USERS (id) NOT NULL, -- NO CASCADE DELETE
     shard integer NOT NULL, -- 0, 1, 2, ...
@@ -64,18 +64,28 @@ CREATE TABLE pupmoney.WALLETS (
     default_wallet smallint NOT NULL DEFAULT 0, --0=false , 1=true default wallets cannot be deleted, each user has 1
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX wallet_shares_idx on pupmoney.WALLETS USING GIN ("shares");
-CREATE INDEX _wallets_user_id_idx ON pupmoney.WALLETS (user_id);
+CREATE INDEX wallet_shares_idx on WALLETS USING GIN ("shares");
+CREATE INDEX _wallets_user_id_idx ON WALLETS (user_id);
 
 
-CREATE TABLE pupmoney.IPS (
+CREATE TABLE IPS (
     id serial PRIMARY KEY,
     ip text NOT NULL,
     user_id integer REFERENCES USERS (id) NOT NULL, -- NO CASCADE DELETE
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX _ips_user_id_idx ON pupmoney.IPS (user_id);
-CREATE UNIQUE INDEX _userid_ip_idx ON pupmoney.IPS (user_id, ip);
+CREATE INDEX _ips_user_id_idx ON IPS (user_id);
+CREATE UNIQUE INDEX _userid_ip_idx ON IPS (user_id, ip);
+
+
+CREATE TABLE PAYMENTS (
+    id serial PRIMARY KEY,
+    amt numeric(4,2) not null,
+    user_id integer REFERENCES USERS (id) NOT NULL, -- NO CASCADE DELETE
+    dttm DATE DEFAULT current_date
+);
+CREATE INDEX _payments_user_id_idx ON PAYMENTS (user_id);
+
 
 \! echo "\n-------------------------"
 \! echo "Create development grants"
@@ -86,13 +96,13 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \if :is_warren
     do $$
     BEGIN
-        grant all on pupmoney.codes to warren;
-        grant all on pupmoney.users_id_seq to warren;
-        grant all on pupmoney.users to warren;
-        grant all on pupmoney.wallets_id_seq to warren;
-        grant all on pupmoney.wallets to warren;
-        grant all on pupmoney.ips_id_seq to warren;
-        grant all on pupmoney.ips to warren;
+        grant all on codes to warren;
+        grant all on users_id_seq to warren;
+        grant all on users to warren;
+        grant all on wallets_id_seq to warren;
+        grant all on wallets to warren;
+        grant all on ips_id_seq to warren;
+        grant all on ips to warren;
     END;
     $$ LANGUAGE plpgsql;
 \endif

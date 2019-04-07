@@ -9,10 +9,20 @@ Shard #0 holds the USERS, CODES and WALLETS tables plus a set of wallet child ta
 ## SEARCH_PATH
 All databases must have the search path set to the "pupmoney" schema. This can be done on a permanent basis. Change for each shard.
 ```bash
-# View the path
-show search_path;
-# Alter the path
+#Change to the postgres database\
+\c postgres
+# Alter the paths
 alter database "pup-0"  set search_path to pupmoney;
+alter database "pup-1"  set search_path to pupmoney;
+alter database "pup-2"  set search_path to pupmoney;
+
+# View the paths 
+\c pup-0
+show search_path;
+\c pup-1
+show search_path;
+\c pup-2
+show search_path;
 ```
 
 ## PostgreSQL Mac Install
@@ -22,3 +32,20 @@ https://postgresapp.com/
 
 ## ElephantSQL
 Both stage and production shards are hosted by ElephantSQL. Connection info is in the SECRECTS project.
+
+
+## Start/Stop on Ubuntu Server
+
+https://websiteforstudents.com/how-to-install-postgresql-11-on-ubuntu-16-04-18-04-servers/
+https://computingforgeeks.com/install-postgresql-11-on-ubuntu-18-04-ubuntu-16-04/
+
+sudo systemctl stop postgresql.service
+sudo systemctl start postgresql.service
+sudo systemctl restart postgresql.service
+sudo systemctl enable postgresql.service
+sudo systemctl status postgresql.service
+
+sudo su - postgres
+sudo nano /etc/postgresql/11/main/postgresql.conf
+
+$ scp -r database warren@192.168.0.40:~

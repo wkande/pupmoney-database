@@ -1,7 +1,7 @@
 const { Pool, Client } = require('pg');
 var fs = require("fs");
 var war = fs.readFileSync("./data/_war_peace.txt").toString('utf-8');
-
+var format = require('pg-format');
 
 let name;
 let email;
@@ -11,7 +11,7 @@ let start = async function(){
     // Get the count of existing users
     var query = {
         name: 'user-get-count',
-        text: "SELECT count(*) cnt from users"
+        text: "SELECT count(*) cnt from pupmoney.users"
     };
     const countRes = await shards[0].query(query);
     let cnt = countRes.rows[0].cnt;
@@ -31,14 +31,14 @@ let start = async function(){
         // Update Betsy Wallet Shares
         var queryBetsyUpdate = {
             name: 'betsy-wallet-shares',
-            text: "UPDATE wallets SET name = 'Betsy Wallet', shares = ARRAY[1] WHERE user_id = 2"
+            text: "UPDATE pupmoney.wallets SET name = 'Betsy Wallet', shares = ARRAY[1] WHERE user_id = 2"
         };
         const betsySharesRes = await shards[0].query(queryBetsyUpdate); // shard 0 here
 
         // Warren as sys_admin
         var queryWarrenUpdateAdmin = {
             name: 'users-patch-warren-2',
-            text: "UPDATE users SET sys_admin = 1 WHERE email = 'warren@wyoming.cc'"
+            text: "UPDATE pupmoney.users SET sys_admin = 1 WHERE email = 'warren@wyoming.cc'"
         };
         const sysAdminsRes = await shards[0].query(queryWarrenUpdateAdmin);
 
@@ -46,7 +46,7 @@ let start = async function(){
     }
 
     // Add more users
-    for(var i=0; i<200; i++){
+    for(var i=0; i<30000; i++){
         cnt++;
         name = 'TestUser_'+cnt;
         email = 'test_user_'+cnt+'@noaddresshere.com';
@@ -68,7 +68,7 @@ let addUser = async function(){
 
         var query = {
             name: 'users-post-with-default-wallet',
-            text: "SELECT * from add_user($1, $2, $3)",
+            text: "SELECT * from pupmoney.add_user($1, $2, $3)",
             values: [name, email, shard]
         };
         const userRes = await shards[0].query(query); // shard 0 here
@@ -79,7 +79,7 @@ let addUser = async function(){
         // GET THE DEFAULT WALLET, should only be one
         var query = {
             name: 'wallets-get-default',
-            text: "SELECT * from wallets where default_wallet = 1 AND user_id = $1",
+            text: "SELECT * from pupmoney.wallets where default_wallet = 1 AND user_id = $1",
             values: [userRes.rows[0].add_user.id]
         };
         const data = await shards[0].query(query); // shard 0 here
@@ -92,7 +92,7 @@ let addUser = async function(){
         // CALL finalize_wallet()
         var query = {
             name: 'users-post-with-finalize-wallet',
-            text: "SELECT * from finalize_wallet($1)",
+            text: "SELECT * from pupmoney.finalize_wallet($1)",
             values: [wallet_id]
         };
         const walletRes = await shards[wallet_shard].query(query);
@@ -135,27 +135,54 @@ let getShard = async function(){
 let startExpItems = async function(wallet_id, shard){
     var query = {
         name: 'exp-get',
-        text: "SELECT * from categories where wallet_id = $1 order by name",
+        text: "SELECT * from pupmoney.categories where wallet_id = $1 order by name",
         values: [wallet_id]
     };
     const res = await shards[shard].query(query);
     console.log('  CATEGORIES FOUND', res.rowCount);
+
+    let arr = [];
     for(var i=0; i<res.rows.length; i++){
         //console.log("      CAT_ID", res.rows[i].id, "NAME", res.rows[i].name);
-        for(var z=0; z<307; z++){
-            await addExpenses(res.rows[i].id, shard);
+        
+        for(var z=0; z<2000; z++){
+            //await addExpenses(res.rows[i].id, shard);
+            arr.push(addExpenses(res.rows[i].id, shard));
         }
+
+    }
+
+    // Bulk insert
+    console.log('ARRAY READY', arr.length)
+    try{
+        let query = format('INSERT INTO expenses (category_id, amt, dttm, note, vendor, document) VALUES %L', arr);
+        
+        const res = await shards[shard].query(query);
+        console.log('ARRAY INSERTED')
+    }
+    catch(err){
+        // May fail due to duplicate date, just let it go
+        console.log("ERROR inserting expense:", err.toString());
     }
 }
-let addExpenses = async function(cat_id, shard){
+
+
+let addExpenses = function(cat_id, shard){
     var precision = 100; // 2 decimals
     var randomnum = Math.floor(Math.random() * (10 * precision - 1 * precision) + 1 * precision) / (1*precision);
-    let randumDate = getRandomDate(new Date(2014, 0, 1), new Date());
+    let randumDate = getRandomDate(new Date(2009, 0, 1), new Date());
     let vendor = randomVendor();
     let note = getNoteTextDoc();
     //console.log('cat_id, shard', cat_id, shard);
 
-    try{
+    // Credit
+    var items = Array(0,0,0,0,0,1,0,1,0,0,1,0,0,0);
+    var credit = items[Math.floor(Math.random()*items.length)];
+    if(credit == 1) randomnum = randomnum * -1;
+    
+    return [cat_id, randomnum, randumDate, note, vendor, "Placeholder for trigger"];
+
+    /*try{
         var query = {
             name: 'expenses-item-post',
             text: `insert into expenses (category_id, amt, dttm, note, vendor, document) 
@@ -167,7 +194,7 @@ let addExpenses = async function(cat_id, shard){
     catch(err){
         // May fail due to duplicate date, just let it go
         console.log("ERROR inserting expense:", err.toString());
-    }
+    }*/
     
 }
 
