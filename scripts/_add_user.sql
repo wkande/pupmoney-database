@@ -22,9 +22,10 @@ CREATE OR REPLACE FUNCTION add_user(fullname TEXT, email text, shardNumb integer
         WHERE u.id = user_id;
 
         RETURN row_to_json(r_Return);
+
     EXCEPTION
-        WHEN division_by_zero THEN
-            RAISE NOTICE 'caught at add_user';
+        WHEN others THEN
+            RAISE EXCEPTION 'caught at add_user - % %', SQLERRM, SQLSTATE;
     END;
     $$ LANGUAGE plpgsql;
 

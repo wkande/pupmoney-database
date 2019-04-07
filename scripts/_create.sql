@@ -45,20 +45,21 @@ SELECT count(*) = 0 as not_master FROM information_schema.tables WHERE table_sch
 
 
 -- CATEGORIES --
-CREATE TABLE pupmoney.CATEGORIES (
+CREATE TABLE CATEGORIES (
     id serial PRIMARY KEY,
     wallet_id integer NOT NULL,
     name text NOT NULL,
+    vendors text[] DEFAULT array[]::text[],
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX _categories_dttm_idx ON pupmoney.CATEGORIES (dttm);
-CREATE INDEX _categories_wallet_id_idx ON pupmoney.CATEGORIES (wallet_id);
-CREATE UNIQUE INDEX _categories_wallet_id_name_idx ON pupmoney.CATEGORIES (wallet_id, name);
+CREATE INDEX _categories_dttm_idx ON CATEGORIES (dttm);
+CREATE INDEX _categories_wallet_id_idx ON CATEGORIES (wallet_id);
+CREATE UNIQUE INDEX _categories_wallet_id_name_idx ON CATEGORIES (wallet_id, name);
 
 
 -- EXPENSES --
 -- Max amt 9,999,999,999.9999 or 10 billion
-CREATE TABLE pupmoney.EXPENSES (
+CREATE TABLE EXPENSES (
     id serial PRIMARY KEY,
     category_id integer REFERENCES CATEGORIES (id) ON DELETE CASCADE NOT NULL, 
     vendor text,
@@ -69,20 +70,20 @@ CREATE TABLE pupmoney.EXPENSES (
     amt numeric(14,4) not null,
     dttm DATE not null
 );
-CREATE INDEX _expenses_dttm_idx ON pupmoney.EXPENSES (dttm);
-CREATE INDEX _expenses_category_id_idx ON pupmoney.EXPENSES (category_id);
-CREATE INDEX _expenses_text_search_idx ON pupmoney.EXPENSES USING gin(document);
+CREATE INDEX _expenses_dttm_idx ON EXPENSES (dttm);
+CREATE INDEX _expenses_category_id_idx ON EXPENSES (category_id);
+CREATE INDEX _expenses_text_search_idx ON EXPENSES USING gin(document);
 
 
 -- VENDORS --
-CREATE TABLE pupmoney.VENDORS (
+/*CREATE TABLE VENDORS (
     id serial PRIMARY KEY,
     category_id integer REFERENCES CATEGORIES (id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL
 );
-CREATE INDEX _vendors_category_id_idx ON pupmoney.VENDORS (category_id);
-CREATE UNIQUE INDEX _vendors_category_id_name_idx ON pupmoney.VENDORS (category_id, name);
-
+CREATE INDEX _vendors_category_id_idx ON VENDORS (category_id);
+CREATE UNIQUE INDEX _vendors_category_id_name_idx ON VENDORS (category_id, name);
+*/
 
 \! echo "\n-----------------------------------"
 \! echo "Create development grants if needed"
@@ -94,12 +95,12 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \if :is_warren
     do $$
     BEGIN
-        grant all on pupmoney.vendors_id_seq to warren;
-        grant all on pupmoney.vendors to warren;
-        grant all on pupmoney.categories_id_seq to warren;
-        grant all on pupmoney.categories to warren;
-        grant all on pupmoney.expenses_id_seq to warren;
-        grant all on pupmoney.expenses to warren;
+        --grant all on vendors_id_seq to warren;
+        --grant all on vendors to warren;
+        grant all on categories_id_seq to warren;
+        grant all on categories to warren;
+        grant all on expenses_id_seq to warren;
+        grant all on expenses to warren;
     END;
     $$ LANGUAGE plpgsql;
 \endif
@@ -116,6 +117,7 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \i   ~/Development/_pupmoney/database/scripts/_delete_wallet_shard.sql;
 \i   ~/Development/_pupmoney/database/scripts/_items_type.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_expenses.sql;
+\i   ~/Development/_pupmoney/database/scripts/_get_expenses_text_search.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_category_summary.sql;
 \i   ~/Development/_pupmoney/database/scripts/_check_expense_category_id.sql;
 \i   ~/Development/_pupmoney/database/scripts/_create_expense_document.sql;

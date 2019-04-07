@@ -27,9 +27,9 @@ CREATE OR REPLACE FUNCTION get_expenses(q TEXT, dttmStart DATE, dttmEnd DATE, wa
             WHERE e.dttm between dttmStart AND dttmEnd AND c.wallet_id = walletId AND e.category_id = catID;
 
         ELSE
-            SELECT array_to_json(array_agg(row_to_json(t))) INTO result.expenses 
+            SELECT array_to_json(array_agg(row_to_json(t))) INTO result.items 
             from (  
-                SELECT e.id, e.expense_id, c.wallet_id, e.document, e.amt, e.dttm, e.note, e.vendor
+                SELECT e.id, e.category_id, c.wallet_id, e.document, e.amt, e.dttm, e.note, e.vendor
                 FROM expenses e JOIN categories c
                 ON e.category_id = c.id
                 WHERE e.document @@ to_tsquery(q)
