@@ -17,7 +17,7 @@ CREATE OR REPLACE FUNCTION get_expenses_text_search(q TEXT, walletId integer,  s
             ON e.category_id = c.id
             WHERE e.document @@ to_tsquery(q)
             AND c.wallet_id = walletId  
-            ORDER BY e.dttm DESC LIMIT 50 OFFSET skip
+            ORDER BY e.dttm DESC, e.id DESC LIMIT 50 OFFSET skip
         ) t;
 
         SELECT count(*) cnt into result.total_cnt 
