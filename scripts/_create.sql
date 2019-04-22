@@ -31,8 +31,6 @@ SELECT count(*) = 0 as not_master FROM information_schema.tables WHERE table_sch
     BEGIN
         DROP SCHEMA if exists pupmoney CASCADE;
         CREATE SCHEMA pupmoney;
-        --GRANT ALL ON SCHEMA pupmoney TO postgres;
-        --GRANT ALL ON SCHEMA pupmoney TO public;
         COMMENT ON SCHEMA pupmoney IS 'pupmoney schema';
     END;
     $$ LANGUAGE plpgsql;
@@ -42,7 +40,6 @@ SELECT count(*) = 0 as not_master FROM information_schema.tables WHERE table_sch
 \! echo "\n-------------------------"
 \! echo "Create tables and indexes"
 \! echo "-------------------------"
-
 
 -- CATEGORIES --
 CREATE TABLE CATEGORIES (
@@ -85,8 +82,6 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \if :is_warren
     do $$
     BEGIN
-        --grant all on vendors_id_seq to warren;
-        --grant all on vendors to warren;
         grant all on categories_id_seq to warren;
         grant all on categories to warren;
         grant all on expenses_id_seq to warren;
@@ -94,9 +89,6 @@ SELECT current_user = 'warren' AS is_warren; \gset
     END;
     $$ LANGUAGE plpgsql;
 \endif
-
-
-
 
 
 \! echo "\n----------------"
@@ -112,7 +104,6 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \i   ~/Development/_pupmoney/database/scripts/_get_category_summary.sql;
 \i   ~/Development/_pupmoney/database/scripts/_check_expense_category_id.sql;
 \i   ~/Development/_pupmoney/database/scripts/_create_expense_document.sql;
-
 
 
 SET client_min_messages TO NOTICE;
