@@ -38,6 +38,7 @@ Both stage and production shards are hosted by ElephantSQL. Connection info is i
 
 https://websiteforstudents.com/how-to-install-postgresql-11-on-ubuntu-16-04-18-04-servers/
 https://computingforgeeks.com/install-postgresql-11-on-ubuntu-18-04-ubuntu-16-04/
+https://chartio.com/resources/tutorials/how-to-change-a-user-to-superuser-in-postgresql/
 
 sudo systemctl stop postgresql.service
 sudo systemctl start postgresql.service
