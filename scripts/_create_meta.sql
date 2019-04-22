@@ -61,10 +61,11 @@ CREATE TABLE WALLETS (
     shard integer NOT NULL, -- 0, 1, 2, ...
     shares integer[] DEFAULT array[]::integer[],
     name text NOT NULL,
+    currency JSONB DEFAULT '{"curId":2, "symbol":"", "separator":",", "decimal":".", "precision": 2}' NOT NULL,
     default_wallet smallint NOT NULL DEFAULT 0, --0=false , 1=true default wallets cannot be deleted, each user has 1
     dttm DATE DEFAULT current_date
 );
-CREATE INDEX wallet_shares_idx on WALLETS USING GIN ("shares");
+CREATE INDEX _wallet_shares_idx on WALLETS USING GIN ("shares");
 CREATE INDEX _wallets_user_id_idx ON WALLETS (user_id);
 
 

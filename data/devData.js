@@ -145,25 +145,30 @@ let startExpItems = async function(wallet_id, shard){
     for(var i=0; i<res.rows.length; i++){
         //console.log("      CAT_ID", res.rows[i].id, "NAME", res.rows[i].name);
         
+        process.stdout.write('.');
         for(var z=0; z<2000; z++){
             //await addExpenses(res.rows[i].id, shard);
             arr.push(addExpenses(res.rows[i].id, shard));
         }
 
+        
+
     }
 
-    // Bulk insert
-    console.log('ARRAY READY', arr.length)
-    try{
-        let query = format('INSERT INTO expenses (category_id, amt, dttm, note, vendor, document) VALUES %L', arr);
-        
-        const res = await shards[shard].query(query);
-        console.log('ARRAY INSERTED')
-    }
-    catch(err){
-        // May fail due to duplicate date, just let it go
-        console.log("ERROR inserting expense:", err.toString());
-    }
+    // Bulk insert for each category
+        console.log('ARRAY LOADED')
+        try{
+            let query = format('INSERT INTO expenses (category_id, amt, dttm, note, vendor, document) VALUES %L', arr);
+            
+            const res = await shards[shard].query(query);
+            console.log('ARRAY INSERTED')
+        }
+        catch(err){
+            // May fail due to duplicate date, just let it go
+            console.log("ERROR inserting expense:", err.toString());
+        }
+
+    
 }
 
 
