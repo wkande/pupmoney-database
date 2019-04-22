@@ -49,7 +49,7 @@ CREATE TABLE CATEGORIES (
     id serial PRIMARY KEY,
     wallet_id integer NOT NULL,
     name text NOT NULL,
-    vendors text[] DEFAULT array[]::text[],
+    vendors text[] DEFAULT array[]::text[] NOT NULL,
     dttm DATE DEFAULT current_date
 );
 CREATE INDEX _categories_dttm_idx ON CATEGORIES (dttm);
@@ -74,16 +74,6 @@ CREATE INDEX _expenses_dttm_idx ON EXPENSES (dttm);
 CREATE INDEX _expenses_category_id_idx ON EXPENSES (category_id);
 CREATE INDEX _expenses_text_search_idx ON EXPENSES USING gin(document);
 
-
--- VENDORS --
-/*CREATE TABLE VENDORS (
-    id serial PRIMARY KEY,
-    category_id integer REFERENCES CATEGORIES (id) ON DELETE CASCADE NOT NULL,
-    name text NOT NULL
-);
-CREATE INDEX _vendors_category_id_idx ON VENDORS (category_id);
-CREATE UNIQUE INDEX _vendors_category_id_name_idx ON VENDORS (category_id, name);
-*/
 
 \! echo "\n-----------------------------------"
 \! echo "Create development grants if needed"
@@ -116,6 +106,7 @@ SELECT current_user = 'warren' AS is_warren; \gset
 \i   ~/Development/_pupmoney/database/scripts/_finalize_wallet.sql;
 \i   ~/Development/_pupmoney/database/scripts/_delete_wallet_shard.sql;
 \i   ~/Development/_pupmoney/database/scripts/_items_type.sql;
+\i   ~/Development/_pupmoney/database/scripts/_get_expenses_by_category.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_expenses.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_expenses_text_search.sql;
 \i   ~/Development/_pupmoney/database/scripts/_get_category_summary.sql;
