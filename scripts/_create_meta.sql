@@ -22,6 +22,7 @@ SET client_min_messages TO WARNING;
 \! echo "\n------------------------------"
 \! echo "Dropping and re-creating schema"
 \! echo "------------------------------"
+
 DROP SCHEMA if exists pupmoney CASCADE;
 CREATE SCHEMA pupmoney;
 COMMENT ON SCHEMA pupmoney IS 'pupmoney schema';
@@ -31,6 +32,7 @@ COMMENT ON SCHEMA pupmoney IS 'pupmoney schema';
 \! echo "\n-------------------------"
 \! echo "Create tables and indexes"
 \! echo "-------------------------"
+
 -- CODE --
 create table CODES( -- For registration and login
   email text NOT NULL,
@@ -69,16 +71,6 @@ CREATE INDEX _wallet_shares_idx on WALLETS USING GIN ("shares");
 CREATE INDEX _wallets_user_id_idx ON WALLETS (user_id);
 
 
-CREATE TABLE IPS (
-    id serial PRIMARY KEY,
-    ip text NOT NULL,
-    user_id integer REFERENCES USERS (id) NOT NULL, -- NO CASCADE DELETE
-    dttm DATE DEFAULT current_date
-);
-CREATE INDEX _ips_user_id_idx ON IPS (user_id);
-CREATE UNIQUE INDEX _userid_ip_idx ON IPS (user_id, ip);
-
-
 CREATE TABLE PAYMENTS (
     id serial PRIMARY KEY,
     amt numeric(4,2) not null,
@@ -91,6 +83,7 @@ CREATE INDEX _payments_user_id_idx ON PAYMENTS (user_id);
 \! echo "\n-------------------------"
 \! echo "Create development grants"
 \! echo "-------------------------"
+
 SELECT current_user = 'warren' AS is_warren; \gset
 --\echo :is_warren
 
@@ -102,8 +95,8 @@ SELECT current_user = 'warren' AS is_warren; \gset
         grant all on users to warren;
         grant all on wallets_id_seq to warren;
         grant all on wallets to warren;
-        grant all on ips_id_seq to warren;
-        grant all on ips to warren;
+        grant all on payments_id_seq to warren;
+        grant all on payments to warren;
     END;
     $$ LANGUAGE plpgsql;
 \endif
