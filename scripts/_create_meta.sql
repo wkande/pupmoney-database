@@ -69,6 +69,7 @@ CREATE TABLE WALLETS (
 );
 CREATE INDEX _wallet_shares_idx on WALLETS USING GIN ("shares");
 CREATE INDEX _wallets_user_id_idx ON WALLETS (user_id);
+CREATE UNIQUE INDEX _wallets_name_userid_idx ON WALLETS (user_id, name);
 
 
 CREATE TABLE PAYMENTS (
