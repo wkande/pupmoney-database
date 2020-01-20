@@ -15,13 +15,13 @@ CREATE OR REPLACE FUNCTION create_expense_document() RETURNS trigger AS $expense
         NEW.document :=
             to_tsvector('english', COALESCE(new.note,'')) ||
             to_tsvector('english', COALESCE(new.vendor,'')) ||
-            to_tsvector('english',  COALESCE(amtChar,'')) ||
+            to_tsvector('english', COALESCE(amtChar,'')) ||
             to_tsvector('english', COALESCE(catName,''));
 
         RETURN NEW;
     EXCEPTION
         WHEN others THEN
-            RAISE EXCEPTION 'caught at finalize_wallet - % %', SQLERRM, SQLSTATE;
+            RAISE EXCEPTION 'caught at create_expense_document - % %', SQLERRM, SQLSTATE;
     END;
 $expense_document$ LANGUAGE plpgsql;
 

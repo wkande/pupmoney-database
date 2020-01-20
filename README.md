@@ -1,8 +1,8 @@
 # pupmoney-database
 Database script and notes for PupMoney.
 
-PostgreSQL version 11x. Production and Stage are run on ElephantSQL and development is localhost. The
-databases are manually sharded. The backend will connect to all databases listed in the DB_URLS array.
+PostgreSQL version 11x. Production and Beta are run on ElephantSQL and development is localhost. The databases are manually sharded. The backend will connect to all databases listed in the DB_URLS array. 
+
 Shard #0 holds the USERS, CODES and WALLETS tables plus a set of wallet child tables. Shards #1 (and up) hold only the wallet child tables.
 
 
@@ -12,16 +12,10 @@ All databases must have the search path set to the "pupmoney" schema. This can b
 #Change to the postgres database\
 \c postgres
 # Alter the paths
-alter database "pup-0"  set search_path to pupmoney;
-alter database "pup-1"  set search_path to pupmoney;
-alter database "pup-2"  set search_path to pupmoney;
+alter database "<db_name>"  set search_path to pupmoney;
 
 # View the paths 
-\c pup-0
-show search_path;
-\c pup-1
-show search_path;
-\c pup-2
+\c <db_name>
 show search_path;
 ```
 
@@ -31,7 +25,7 @@ https://postgresapp.com/
 
 
 ## ElephantSQL
-Both stage and production shards are hosted by ElephantSQL. Connection info is in the SECRECTS project.
+Both beta and production shards are hosted by ElephantSQL. Connection info is in the SECRECTS project.
 
 
 ## Start/Stop on Ubuntu Server

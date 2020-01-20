@@ -74,8 +74,8 @@ CREATE UNIQUE INDEX _wallets_name_userid_idx ON WALLETS (user_id, name);
 
 CREATE TABLE PAYMENTS (
     id serial PRIMARY KEY,
-    amt numeric(4,2) not null,
     user_id integer REFERENCES USERS (id) NOT NULL, -- NO CASCADE DELETE
+    amt numeric(4,2) not null,
     dttm DATE DEFAULT current_date
 );
 CREATE INDEX _payments_user_id_idx ON PAYMENTS (user_id);

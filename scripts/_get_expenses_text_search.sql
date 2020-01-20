@@ -3,7 +3,7 @@
  */
 
 
-CREATE OR REPLACE FUNCTION get_expenses_text_search(q TEXT, walletId integer,  skip integer)
+CREATE OR REPLACE FUNCTION get_expenses_text_search(lang TEXT, q TEXT, walletId integer,  skip integer)
 
     RETURNS items AS $$
     DECLARE
@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION get_expenses_text_search(q TEXT, walletId integer,  s
             SELECT e.id, e.category_id, c.wallet_id, c.id c_id, c.name c_name, e.document, e.amt, e.dttm, e.note, e.vendor
             FROM expenses e JOIN categories c
             ON e.category_id = c.id
-            WHERE e.document @@ to_tsquery(q)
+            WHERE e.document @@ to_tsquery('english', q)
             AND c.wallet_id = walletId  
             ORDER BY e.dttm DESC, e.id DESC LIMIT 50 OFFSET skip
         ) t;
@@ -23,14 +23,14 @@ CREATE OR REPLACE FUNCTION get_expenses_text_search(q TEXT, walletId integer,  s
         SELECT count(*) cnt into result.total_cnt 
         FROM expenses e JOIN categories c
         ON e.category_id = c.id
-        WHERE e.document @@ to_tsquery(q)
+        WHERE e.document @@ to_tsquery('english', q)
         AND c.wallet_id = walletId;
 
 
         RETURN result;
     EXCEPTION
         WHEN others THEN
-            RAISE EXCEPTION 'get_expenses_text_search - % %', SQLERRM, SQLSTATE;
+            RAISE EXCEPTION 'get_expenses_text_search - %; %; %', SQLERRM, SQLSTATE, lang;
     END;
     $$ LANGUAGE plpgsql;
 

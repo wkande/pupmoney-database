@@ -5,7 +5,8 @@
 
 CREATE TYPE items AS (
   items  json,
-  total_cnt int
+  total_cnt int,
+  total_amt float
 );
 
 

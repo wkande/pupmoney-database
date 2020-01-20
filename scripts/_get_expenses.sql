@@ -21,7 +21,12 @@ CREATE OR REPLACE FUNCTION get_expenses(q TEXT, dttmStart DATE, dttmEnd DATE, wa
                 ORDER BY e.dttm DESC, e.id DESC LIMIT 50 OFFSET skip
             ) t;
 
-            SELECT count(*) cnt into result.total_cnt 
+            SELECT count(*) into result.total_cnt 
+            FROM expenses e JOIN categories c
+            ON e.category_id = c.id
+            WHERE e.dttm between dttmStart AND dttmEnd AND c.wallet_id = walletId;
+
+            SELECT COALESCE(SUM(amt),0) into result.total_amt 
             FROM expenses e JOIN categories c
             ON e.category_id = c.id
             WHERE e.dttm between dttmStart AND dttmEnd AND c.wallet_id = walletId;

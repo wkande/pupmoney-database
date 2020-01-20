@@ -11,7 +11,7 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
 
         -- Groceries
         INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Groceries',
-            '{"Albertsons", "Amazon", "Safeway", "Harris Teeter", "Target", "Walmart"}'
+            '{"Albertsons", "Amazon", "Harris Teeter", "Safeway",  "Target", "Walmart"}'
         ) RETURNING id INTO cat_id;
 
 
@@ -27,8 +27,8 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
         ) RETURNING id INTO cat_id;
 
 
-        -- Home Maintenance
-        INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Home Maintenance',
+        -- Household
+        INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Household',
             '{"Amazon", "Home Depot", "Lowes", "Menards"}'
         ) RETURNING id INTO cat_id;
 
@@ -41,19 +41,19 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
 
         -- Restaurants
         INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Restaurants',
-            '{"Chili''s", "MacDonald''s", "Subway", "Jimmy John''s", "Burger King", "Dairy Queen"}'
+            '{"Chili''s", "Burger King", "Dairy Queen", "Jimmy John''s", "MacDonald''s", "Subway"}'
         ) RETURNING id INTO cat_id;
 
 
         -- Insurance
         INSERT INTO pupmoney.categories (wallet_id, name, vendors) VALUES  (walletId, 'Insurance',
-            '{"Alstate", "Farmers", "Geico", "Liberty Mutual", "State Farm", "Nationwide", "Progressive"}'
+            '{"Allstate", "Farmers", "Geico", "Liberty Mutual", "Nationwide", "Progressive", "State Farm"}'
         ) RETURNING id INTO cat_id;
   
 
         -- Interest & Fees
         INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Interest & Fees',
-            '{"Wells Fargo", "Bank of America", "Capitol One", "Ally", "Live Oak"}'
+            '{"Ally", "Bank of America", "Capitol One", "Live Oak", "Wells Fargo"}'
         ) RETURNING id INTO cat_id;
  
 
@@ -61,9 +61,9 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
         INSERT INTO categories (wallet_id, name) VALUES  (walletId, 'Taxes') RETURNING id INTO cat_id;
 
 
-        -- Gambling
-        INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Gambling',
-            '{"Powerbal", "MegaMillions"}'
+        -- Lotteries
+        INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Lotteries',
+            '{ "MegaMillions", "Powerbal"}'
         ) RETURNING id INTO cat_id;
 
 
@@ -75,13 +75,13 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
 
         -- Transport
         INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Transport',
-            '{"Uber", "Lyft", "Municipal Bus"}'
+            '{"Lyft", "Municipal Bus", "Uber"}'
         ) RETURNING id INTO cat_id;
 
 
         -- Beauty
         INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Beauty',
-            '{"Sephora", "Dillard''s", "Macy''s"}'
+            '{"Dillard''s",  "Macy''s", "Sephora"}'
         ) RETURNING id INTO cat_id;
 
 
@@ -93,7 +93,7 @@ CREATE OR REPLACE FUNCTION finalize_wallet(walletId integer)
  
         -- Utilities
         INSERT INTO categories (wallet_id, name, vendors) VALUES  (walletId, 'Utilities',
-            '{"Water Company", "Power Company.", "Gas Company."}'
+            '{"Electric Company", "Gas Company", "Water Company"}'
         ) RETURNING id INTO cat_id;
 
  

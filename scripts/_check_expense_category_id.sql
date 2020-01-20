@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION check_expense_category_id() RETURNS trigger AS $check
 
     EXCEPTION
         WHEN others THEN
-            RAISE EXCEPTION 'caught at finalize_wallet - % %', SQLERRM, SQLSTATE;
+            RAISE EXCEPTION 'caught at check_expense_category_id - % %', SQLERRM, SQLSTATE;
     END;
 $check_expense_category_id$ LANGUAGE plpgsql;
 
